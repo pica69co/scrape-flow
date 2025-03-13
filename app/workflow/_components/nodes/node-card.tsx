@@ -3,6 +3,7 @@
 import { cn } from "@/lib/utils";
 import { useReactFlow } from "@xyflow/react";
 import { ReactNode } from "react";
+import UseFlowValidation from "@/components/hooks/use-flow-validation";
 
 const NodeCard = ({
   nodeId,
@@ -14,6 +15,9 @@ const NodeCard = ({
   children: ReactNode;
 }) => {
   const { getNode, setCenter } = useReactFlow();
+  const { invalidInputs } = UseFlowValidation();
+  const hasInvalidInputs = invalidInputs.some((node) => node.nodeId === nodeId);
+
   return (
     <div
       onDoubleClick={() => {
@@ -32,7 +36,8 @@ const NodeCard = ({
       }}
       className={cn(
         "rounded-md cursor-pointer bg-emerald-100/50  border-2 border-separate w-[420px] text-xs gap-1 flex flex-col",
-        isSelected && "border-emerald-500"
+        isSelected && "border-emerald-500",
+        hasInvalidInputs && "border-red-400 border-2"
       )}
     >
       {children}
