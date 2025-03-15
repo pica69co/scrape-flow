@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import "server-only";
 
 import prisma from "@/lib/prisma";
@@ -11,6 +12,9 @@ import { AppNode } from "@/types/appNode";
 import { TaskRegistry } from "./task/registry";
 // import { waitFor } from "../helper/waitFor";
 import { ExecutorRegistry } from "./executor/registry";
+import { Environment, ExecutionEnvironment } from "@/types/executor";
+import { TaskParamType } from "@/types/task";
+import { Browser, Page } from "puppeteer";
 
 export async function ExecuteWorkflow(executionId: string) {
   const execution = await prisma.workflowExecution.findUnique({
@@ -28,7 +32,7 @@ export async function ExecuteWorkflow(executionId: string) {
   }
 
   // TODO: setup the execution environment
-  const environment = {
+  const environment: Environment = {
     phases: {},
   };
 
@@ -45,7 +49,7 @@ export async function ExecuteWorkflow(executionId: string) {
 
   for (const phase of execution.phases) {
     // TODO: execute the phase
-    const phaseExecution = await executeWorkflowPhase(phase);
+    const phaseExecution = await executeWorkflowPhase(phase, environment);
     if (!phaseExecution.success) {
       executionFailed = true;
       break;
@@ -61,6 +65,7 @@ export async function ExecuteWorkflow(executionId: string) {
   );
 
   // TODO: clean up the execution environment
+  await cleanupEnvironment(environment);
 
   revalidatePath(`/workflow/runs`);
 }
@@ -91,11 +96,9 @@ async function initializeWorkflowExecution(
   });
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function initializePhasesStatus(execution: any) {
   await prisma.executionPhase.updateMany({
     where: {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       id: { in: execution.phases.map((phase: any) => phase.id) },
     },
     data: {
@@ -139,9 +142,14 @@ async function finalizeWorkflowExecution(
     });
 }
 
-async function executeWorkflowPhase(phase: ExecutionPhase) {
+async function executeWorkflowPhase(
+  phase: ExecutionPhase,
+  environment: Environment
+) {
   const startedAt = new Date();
   const node = JSON.parse(phase.node) as AppNode;
+
+  setupEnvironmentForPhase(node, environment);
 
   // Update the phase status to RUNNING
   await prisma.executionPhase.update({
@@ -151,6 +159,7 @@ async function executeWorkflowPhase(phase: ExecutionPhase) {
     data: {
       status: ExecutionPhaseStatus.RUNNING,
       startedAt,
+      inputs: JSON.stringify(environment.phases[node.id].inputs),
     },
   });
 
@@ -165,14 +174,15 @@ async function executeWorkflowPhase(phase: ExecutionPhase) {
   // execute phase simulation
   // await waitFor(2000);
   // const success = Math.random() < 0.7; // Simulate a 30% chance of failure
-  const success = await executePhase(node, phase);
+  const success = await executePhase(node, phase, environment);
 
-  await finalizePhase(phase.id, success);
+  const outputs = environment.phases[node.id].outputs;
+  await finalizePhase(phase.id, success, outputs);
 
   return { success };
 }
 
-async function finalizePhase(phaseId: string, success: boolean) {
+async function finalizePhase(phaseId: string, success: boolean, outputs: any) {
   const finalStatus = success
     ? ExecutionPhaseStatus.COMPLETED
     : ExecutionPhaseStatus.FAILED;
@@ -184,16 +194,66 @@ async function finalizePhase(phaseId: string, success: boolean) {
     data: {
       status: finalStatus,
       completedAt: new Date(),
+      outputs: JSON.stringify(outputs),
     },
   });
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-async function executePhase(node: AppNode, phase: ExecutionPhase) {
+async function executePhase(
+  node: AppNode,
+  phase: ExecutionPhase,
+  environment: Environment
+) {
   const runFn = ExecutorRegistry[node.data.type];
   if (!runFn) {
     return false;
   }
 
-  return await runFn();
+  const executionEnvironment: ExecutionEnvironment<any> =
+    createExecutionEnvironment(environment, node);
+
+  return await runFn(executionEnvironment);
+}
+
+function setupEnvironmentForPhase(node: AppNode, environment: Environment) {
+  environment.phases[node.id] = { inputs: {}, outputs: {} };
+  const inputs = TaskRegistry[node.data.type].inputs;
+
+  for (const input of inputs) {
+    if (input.type === TaskParamType.BROWSER_INSTANCE) continue;
+    const inputValue = node.data.inputs[input.name];
+    if (inputValue) {
+      environment.phases[node.id].inputs[input.name] = inputValue;
+
+      continue;
+    }
+    // Get input value from outputs in the environment
+  }
+}
+
+function createExecutionEnvironment(
+  environment: Environment,
+  node: AppNode
+): ExecutionEnvironment<any> {
+  return {
+    getInput: (name: string) => environment.phases[node.id]?.inputs[name],
+
+    setOutput: (name: string, value: string) => {
+      environment.phases[node.id].outputs[name] = value;
+    },
+
+    getBrowser: () => environment.browser,
+    setBrowser: (browser: Browser) => (environment.browser = browser),
+
+    getPage: () => environment.page,
+    setPage: (page: Page) => (environment.page = page),
+  };
+}
+
+async function cleanupEnvironment(environment: Environment) {
+  if (environment.browser) {
+    await environment.browser
+      .close()
+      .catch((error) => console.log("Error closing browser, reason: ", error));
+  }
 }

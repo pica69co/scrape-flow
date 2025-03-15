@@ -23,11 +23,11 @@ export const ExtractTexFromElementTask = {
       required: true,
       // helperText: "CSS selector to extract text from",
     },
-  ],
+  ] as const, // inputs are readonly
   outputs: [
     {
       name: "Extracted text",
       type: TaskParamType.STRING,
     },
-  ],
+  ] as const, // outputs are readonly
 } satisfies WorkflowTask;

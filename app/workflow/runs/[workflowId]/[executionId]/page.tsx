@@ -10,12 +10,15 @@ const ExecutionViewerPage = async ({
 }: {
   params: { executionId: string; workflowId: string };
 }) => {
+  // params should be awaited before using its properties
+  const { executionId, workflowId } = await params;
+
   return (
     <div className="flex flex-col h-screen w-full overflow-hidden">
       <Topbar
-        workflowId={params.executionId}
+        workflowId={executionId}
         title="Workflow run details"
-        subTitle={params.workflowId}
+        subTitle={workflowId}
         hideButtons // to avoid error with zustand
       />
       <section className="flex h-full overflow-auto">
@@ -26,7 +29,7 @@ const ExecutionViewerPage = async ({
             </div>
           }
         >
-          <ExecutionViewerWrapper executionId={params.executionId} />
+          <ExecutionViewerWrapper executionId={executionId} />
         </Suspense>
       </section>
     </div>
