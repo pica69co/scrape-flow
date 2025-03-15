@@ -9,7 +9,8 @@ export async function GetWorkflowExecutionWithPhases(executionId: string) {
     throw new Error("User not authenticated");
   }
 
-  const workflowExecution = await prisma.workflowExecution.findUnique({
+  // const workflowExecution =
+  return await prisma.workflowExecution.findUnique({
     where: {
       id: executionId,
       userId,
@@ -23,5 +24,5 @@ export async function GetWorkflowExecutionWithPhases(executionId: string) {
     },
   });
 
-  return workflowExecution;
+  // return workflowExecution;
 }
