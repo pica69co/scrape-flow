@@ -10,8 +10,9 @@ export async function PageToHtmlExecutor(
     environment.setOutput("Html", html);
 
     return true;
-  } catch (error) {
-    console.error("Error in LaunchBrowserExecutor:", error);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    environment.log.error(`Error in LaunchBrowserExecutor: ${error.message}`);
     return false;
   }
 }

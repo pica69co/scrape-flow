@@ -8,15 +8,16 @@ export async function LaunchBrowserExecutor(
   try {
     const websiteUrl = environment.getInput("Website URL");
     const browser = await puppeteer.launch({
-      headless: false,
+      headless: true, // true: headless mode, false: non-headless mode
     });
     environment.setBrowser(browser);
     const page = await browser.newPage();
     await page.goto(websiteUrl);
     environment.setPage(page);
     return true;
-  } catch (error) {
-    console.log("Error in LaunchBrowserExecutor:", error);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    environment.log.error(`Error in LaunchBrowserExecutor: ${error.message}`);
     return false;
   }
 }

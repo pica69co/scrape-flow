@@ -74,5 +74,21 @@ model ExecutionPhase {
 
   // ExecutionPhase belongs to a WorkflowExecution
   execution WorkflowExecution @relation(fields: [workflowExecutionId], references: [id], onDelete: Cascade)
+
+  // ExecutionPhase can have multiple ExecutionLogs
+  logs ExecutionLog[]
+  // ExecutionPhase can have multiple ExecutionPhases
+
 }
  
+ model ExecutionLog {
+  id          String   @id @default(cuid())
+  logLevel   String
+  message    String
+  timestamp DateTime @default(now())
+
+  executionPhaseId String
+  // ExecutionLog belongs to a ExecutionPhase
+  executionPhase ExecutionPhase @relation(fields: [executionPhaseId], references: [id], onDelete: Cascade)
+
+ }
