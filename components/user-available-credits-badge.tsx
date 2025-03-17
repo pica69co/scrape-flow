@@ -30,7 +30,7 @@ export const UserAvailableCreditsBadge = () => {
         {!query.isLoading && query.data && (
           <ReactCountupWrapper value={query.data} />
         )}
-        {!query.isLoading && !query.data && "-"}
+        {!query.isLoading && query.data === undefined && "-"}
       </span>
     </Link>
   );

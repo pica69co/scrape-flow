@@ -47,7 +47,6 @@ export async function ExecuteWorkflow(executionId: string) {
   // TODO: Initialize the phases status
   await initializePhasesStatus(execution);
 
-  // eslint-disable-next-line prefer-const
   let creditsConsumed = 0;
 
   let executionFailed = false;
@@ -58,8 +57,10 @@ export async function ExecuteWorkflow(executionId: string) {
     const phaseExecution = await executeWorkflowPhase(
       phase,
       environment,
-      edges
+      edges,
+      execution.userId
     );
+    creditsConsumed += phaseExecution.creditsConsumed;
     if (!phaseExecution.success) {
       executionFailed = true;
       break;
@@ -155,7 +156,8 @@ async function finalizeWorkflowExecution(
 async function executeWorkflowPhase(
   phase: ExecutionPhase,
   environment: Environment,
-  edges: Edge[]
+  edges: Edge[],
+  userId: string
 ) {
   const logCollector = createLogCollector();
   const startedAt = new Date();
@@ -177,28 +179,33 @@ async function executeWorkflowPhase(
 
   const creditsRequired = TaskRegistry[node.data.type].credits;
 
-  console.log(
-    `Executing phase ${phase.name} with ${creditsRequired} credits required`
-  );
-
   // TODO: Decrement the user's balance (with required credits)
 
-  // execute phase simulation
-  // await waitFor(2000);
-  // const success = Math.random() < 0.7; // Simulate a 30% chance of failure
-  const success = await executePhase(node, phase, environment, logCollector);
+  let success = await decrementCredits(userId, creditsRequired, logCollector);
+  const creditsConsumed = success ? creditsRequired : 0;
+  if (success) {
+    // if the user has enough credits, execute the phase
+    success = await executePhase(node, phase, environment, logCollector);
+  }
 
   const outputs = environment.phases[node.id].outputs;
-  await finalizePhase(phase.id, success, outputs, logCollector);
+  await finalizePhase(
+    phase.id,
+    success,
+    outputs,
+    logCollector,
+    creditsConsumed
+  );
 
-  return { success };
+  return { success, creditsConsumed };
 }
 
 async function finalizePhase(
   phaseId: string,
   success: boolean,
   outputs: any,
-  logCollector: LogCollector
+  logCollector: LogCollector,
+  creditsConsumed: number
 ) {
   const finalStatus = success
     ? ExecutionPhaseStatus.COMPLETED
@@ -212,6 +219,7 @@ async function finalizePhase(
       status: finalStatus,
       completedAt: new Date(),
       outputs: JSON.stringify(outputs),
+      creditsConsumed,
       logs: {
         createMany: {
           data: logCollector.getAll().map((log) => ({
@@ -302,5 +310,23 @@ async function cleanupEnvironment(environment: Environment) {
     await environment.browser
       .close()
       .catch((error) => console.log("Error closing browser, reason: ", error));
+  }
+}
+
+async function decrementCredits(
+  userId: string,
+  amount: number,
+  LogCollector: LogCollector
+) {
+  try {
+    await prisma.userBalance.update({
+      where: { userId, credits: { gte: amount } },
+      data: { credits: { decrement: amount } },
+    });
+    return true;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  } catch (error) {
+    LogCollector.error("insufficient balance");
+    return false;
   }
 }
