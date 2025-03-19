@@ -7,12 +7,15 @@ import React from "react";
 import { ExecuteBtn } from "./execute-button";
 import { SaveBtn } from "./save-button";
 import { NavigationTabs } from "./navigation-tabs";
+import { PublishBtn } from "./publish-button";
+import { UnpublishBtn } from "./unpublish-button";
 
 interface TopbarProps {
   title: string;
   subTitle?: string;
   workflowId: string;
   hideButtons?: boolean;
+  isPublished?: boolean;
 }
 
 export const Topbar = ({
@@ -20,6 +23,7 @@ export const Topbar = ({
   subTitle,
   workflowId,
   hideButtons = false,
+  isPublished = false,
 }: TopbarProps) => {
   const router = useRouter();
   return (
@@ -44,7 +48,13 @@ export const Topbar = ({
         {hideButtons === false && (
           <>
             <ExecuteBtn workflowId={workflowId} />
-            <SaveBtn workflowId={workflowId} />
+            {isPublished && <UnpublishBtn workflowId={workflowId} />}
+            {!isPublished && (
+              <>
+                <SaveBtn workflowId={workflowId} />
+                <PublishBtn workflowId={workflowId} />
+              </>
+            )}
           </>
         )}
       </div>

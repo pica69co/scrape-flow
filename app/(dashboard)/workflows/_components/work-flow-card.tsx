@@ -58,7 +58,8 @@ export const WorkflowCard = ({ workflow }: { workflow: Workflow }) => {
                 {workflow.name}
                 <span
                   className={cn(
-                    isDraft && "text-xs font-medium bg-yellow-100 ml-2 px-2"
+                    isDraft && "text-xs font-medium bg-yellow-100 ml-2 px-2",
+                    !isDraft && "text-xs font-medium bg-emerald-100 ml-2 px-2"
                   )}
                 >
                   {isDraft ? "(Draft)" : "(Published)"}
