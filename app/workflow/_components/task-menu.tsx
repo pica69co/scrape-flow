@@ -38,25 +38,24 @@ export const TaskMenu = () => {
             <TaskMenuBtn taskType={TaskType.EXTRACT_TEXT_FROM_ELEMENT} />
           </AccordionContent>
         </AccordionItem>
+        <AccordionItem value="timing">
+          <AccordionTrigger className="text-lg font-semibold">
+            Timing controls
+          </AccordionTrigger>
+          <AccordionContent>
+            <TaskMenuBtn taskType={TaskType.WAIT_FOR_ELEMENT} />
+          </AccordionContent>
+        </AccordionItem>
+
+        <AccordionItem value="results">
+          <AccordionTrigger className="text-lg font-semibold">
+            Result delivery
+          </AccordionTrigger>
+          <AccordionContent>
+            <TaskMenuBtn taskType={TaskType.DELIVER_VIA_WEBHOOK} />
+          </AccordionContent>
+        </AccordionItem>
       </Accordion>
-
-      <AccordionItem value="timing">
-        <AccordionTrigger className="text-lg font-semibold">
-          Timing controls
-        </AccordionTrigger>
-        <AccordionContent>
-          <TaskMenuBtn taskType={TaskType.WAIT_FOR_ELEMENT} />
-        </AccordionContent>
-      </AccordionItem>
-
-      <AccordionItem value="results">
-        <AccordionTrigger className="text-lg font-semibold">
-          Result delivery
-        </AccordionTrigger>
-        <AccordionContent>
-          <TaskMenuBtn taskType={TaskType.DELIVER_VIA_WEBHOOK} />
-        </AccordionContent>
-      </AccordionItem>
     </aside>
   );
 };

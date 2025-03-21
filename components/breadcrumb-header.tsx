@@ -7,6 +7,7 @@ import {
   BreadcrumbItem,
   BreadcrumbLink,
   BreadcrumbList,
+  BreadcrumbSeparator,
 } from "./ui/breadcrumb";
 
 import { MobileSidebar } from "./desktop-sidebar";
@@ -26,6 +27,7 @@ export const BreadcrumbHeader = () => {
                   {path === "" ? "Home" : path}
                 </BreadcrumbLink>
               </BreadcrumbItem>
+              {index !== paths.length - 1 && <BreadcrumbSeparator />}
             </React.Fragment>
           ))}
         </BreadcrumbList>
