@@ -3,11 +3,14 @@ export enum TaskType {
   PAGE_TO_HTML = "PAGE_TO_HTML",
   EXTRACT_TEXT_FROM_ELEMENT = "EXTRACT_TEXT_FROM_ELEMENT",
   FILL_INPUT = "FILL_INPUT",
+  CLICK_ELEMENT = "CLICK_ELEMENT",
+  WAIT_FOR_ELEMENT = "WAIT_FOR_ELEMENT",
 }
 
 export enum TaskParamType {
   STRING = "STRING",
   BROWSER_INSTANCE = "BROWSER_INSTANCE",
+  SELECT = "SELECT",
 }
 
 export interface TaskParam {
@@ -17,5 +20,12 @@ export interface TaskParam {
   required?: boolean;
   hideHandle?: boolean;
   value?: string;
-  [key: string]: string | boolean | number | undefined;
+  [key: string]:
+    | string
+    | boolean
+    | number
+    | undefined
+    | { label: string; value: string }[];
+  options?: { label: string; value: string }[];
+  // [key: string]: string | boolean | number | undefined;
 }

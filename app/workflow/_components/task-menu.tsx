@@ -17,7 +17,7 @@ export const TaskMenu = () => {
       <Accordion
         type="multiple"
         className="w-full"
-        defaultValue={["extraction", "interactions"]}
+        defaultValue={["extraction", "interactions", "timing"]}
       >
         <AccordionItem value="interactions">
           <AccordionTrigger className="text-lg font-semibold">
@@ -25,6 +25,7 @@ export const TaskMenu = () => {
           </AccordionTrigger>
           <AccordionContent>
             <TaskMenuBtn taskType={TaskType.FILL_INPUT} />
+            <TaskMenuBtn taskType={TaskType.CLICK_ELEMENT} />
           </AccordionContent>
         </AccordionItem>
 
@@ -38,6 +39,15 @@ export const TaskMenu = () => {
           </AccordionContent>
         </AccordionItem>
       </Accordion>
+
+      <AccordionItem value="timing">
+        <AccordionTrigger className="text-lg font-semibold">
+          Timing controls
+        </AccordionTrigger>
+        <AccordionContent>
+          <TaskMenuBtn taskType={TaskType.WAIT_FOR_ELEMENT} />
+        </AccordionContent>
+      </AccordionItem>
     </aside>
   );
 };
