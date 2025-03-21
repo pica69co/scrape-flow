@@ -3,10 +3,10 @@ import { CustomDialogHeader } from "@/components/custom-dialog-header";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import {
-  CreateWorkflowSchema,
-  CreateWorkflowSchemaType,
+  DuplicateWorkflowSchema,
+  DuplicateWorkflowSchemaType,
 } from "@/schema/workflow";
-import { Layers2Icon, Loader2 } from "lucide-react";
+import { CopyIcon, Layers2Icon, Loader2 } from "lucide-react";
 import React, { useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
 
@@ -23,36 +23,43 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useMutation } from "@tanstack/react-query";
-import { createWorkflow } from "@/actions/workflows/createWorkflow";
-import { toast } from "sonner";
 
-export const CreateWorkflowDialog = ({
-  triggerText,
+import { toast } from "sonner";
+import { duplicateWorkflow } from "@/actions/workflows/duplicate-workflow";
+import { cn } from "@/lib/utils";
+
+export const DuplicateWorkflowDialog = ({
+  workflowId,
 }: {
-  triggerText?: string;
+  workflowId: string;
 }) => {
   const [open, setOpen] = useState(false);
 
-  const form = useForm<CreateWorkflowSchemaType>({
-    resolver: zodResolver(CreateWorkflowSchema),
-    defaultValues: {},
+  const form = useForm<DuplicateWorkflowSchemaType>({
+    resolver: zodResolver(DuplicateWorkflowSchema),
+    defaultValues: {
+      workflowId,
+    },
   });
 
   const { mutate, isPending } = useMutation({
-    mutationFn: createWorkflow,
+    mutationFn: duplicateWorkflow,
     onSuccess: () => {
-      toast.success("Workflow created successfully", { id: "workflow-create" });
+      toast.success("Workflow duplicated successfully", {
+        id: "workflow-duplicate",
+      });
+      setOpen((prev) => !prev);
       form.reset();
     },
     onError: () => {
-      toast.error("Error creating workflow", { id: "workflow-create" });
+      toast.error("Error creating workflow", { id: "workflow-duplicate" });
     },
   });
 
   const onSubmit = useCallback(
-    (values: CreateWorkflowSchemaType) => {
-      toast.loading("Creating workflow...", {
-        id: "workflow-create",
+    (values: DuplicateWorkflowSchemaType) => {
+      toast.loading("Duplicating workflow...", {
+        id: "workflow-duplicate",
       });
       mutate(values);
     },
@@ -64,18 +71,24 @@ export const CreateWorkflowDialog = ({
       open={open}
       onOpenChange={(open) => {
         setOpen(open);
-        form.reset();
+        if (!open) {
+          form.reset();
+        }
       }}
     >
       <DialogTrigger asChild>
-        <Button>{triggerText ?? "Create Workflow"}</Button>
+        <Button
+          variant={"ghost"}
+          size={"icon"}
+          className={cn(
+            "ml-2 transition-opacity duration-200 opacity-0 group-hover/card:opacity-100"
+          )}
+        >
+          <CopyIcon className="h-4 w-4 text-muted-foreground cursor-pointer" />
+        </Button>
       </DialogTrigger>
       <DialogContent className="px-0">
-        <CustomDialogHeader
-          title="Create Workflow"
-          subTitle="Start building your workflow"
-          icon={Layers2Icon}
-        />
+        <CustomDialogHeader title="Duplicate Workflow" icon={Layers2Icon} />
         <div className="p-6">
           <Form {...form}>
             <form
