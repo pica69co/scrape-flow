@@ -17,8 +17,17 @@ export const TaskMenu = () => {
       <Accordion
         type="multiple"
         className="w-full"
-        defaultValue={["extraction"]}
+        defaultValue={["extraction", "interactions"]}
       >
+        <AccordionItem value="interactions">
+          <AccordionTrigger className="text-lg font-semibold">
+            User interactions
+          </AccordionTrigger>
+          <AccordionContent>
+            <TaskMenuBtn taskType={TaskType.FILL_INPUT} />
+          </AccordionContent>
+        </AccordionItem>
+
         <AccordionItem value="extraction">
           <AccordionTrigger className="text-lg font-semibold">
             Data extraction
