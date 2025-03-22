@@ -20,38 +20,39 @@ export const TaskMenu = () => {
         defaultValue={["extraction", "interactions", "timing", "results"]}
       >
         <AccordionItem value="interactions">
-          <AccordionTrigger className="text-lg font-semibold">
+          <AccordionTrigger className="text-lg font-bold">
             User interactions
           </AccordionTrigger>
-          <AccordionContent>
+          <AccordionContent className="flex flex-col gap-1">
             <TaskMenuBtn taskType={TaskType.FILL_INPUT} />
             <TaskMenuBtn taskType={TaskType.CLICK_ELEMENT} />
           </AccordionContent>
         </AccordionItem>
 
         <AccordionItem value="extraction">
-          <AccordionTrigger className="text-lg font-semibold">
+          <AccordionTrigger className="text-lg font-bold">
             Data extraction
           </AccordionTrigger>
-          <AccordionContent>
+          <AccordionContent className="flex flex-col gap-1">
             <TaskMenuBtn taskType={TaskType.PAGE_TO_HTML} />
             <TaskMenuBtn taskType={TaskType.EXTRACT_TEXT_FROM_ELEMENT} />
+            <TaskMenuBtn taskType={TaskType.EXTRACT_DATA_WITH_AI} />
           </AccordionContent>
         </AccordionItem>
         <AccordionItem value="timing">
           <AccordionTrigger className="text-lg font-semibold">
             Timing controls
           </AccordionTrigger>
-          <AccordionContent>
+          <AccordionContent className="flex flex-col gap-1">
             <TaskMenuBtn taskType={TaskType.WAIT_FOR_ELEMENT} />
           </AccordionContent>
         </AccordionItem>
 
         <AccordionItem value="results">
-          <AccordionTrigger className="text-lg font-semibold">
+          <AccordionTrigger className="text-lg font-bold">
             Result delivery
           </AccordionTrigger>
-          <AccordionContent>
+          <AccordionContent className="flex flex-col gap-1">
             <TaskMenuBtn taskType={TaskType.DELIVER_VIA_WEBHOOK} />
           </AccordionContent>
         </AccordionItem>

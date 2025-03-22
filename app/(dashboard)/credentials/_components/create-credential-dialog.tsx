@@ -46,6 +46,7 @@ export const CreateCredentialDialog = ({
         id: "credential-create",
       });
       form.reset();
+      setOpen(false);
     },
     onError: () => {
       toast.error("Error creating credential", { id: "credential-create" });
@@ -63,13 +64,7 @@ export const CreateCredentialDialog = ({
   );
 
   return (
-    <Dialog
-      open={open}
-      onOpenChange={(open) => {
-        setOpen(open);
-        form.reset();
-      }}
-    >
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button>{triggerText ?? "Create"}</Button>
       </DialogTrigger>
